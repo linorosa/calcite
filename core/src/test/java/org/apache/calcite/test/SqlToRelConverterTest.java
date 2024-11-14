@@ -5506,4 +5506,12 @@ class SqlToRelConverterTest extends SqlToRelTestBase {
     String sql = "SELECT CAST(CAST(? AS INTEGER) AS CHAR)";
     sql(sql).ok();
   }
+
+  @Test void testQualifyNotUpdatedOnMergingProjects() {
+    final String sql =
+        "with t0 as (select ename, sal from emp),\n"
+           + "t1 as (select t0.ename, t0.sal from t0 qualify row_number() over (partition by t0.ename order by t0.sal) = 1)\n"
+           + "select ename, sal from t1";
+    sql(sql).ok();
+  }
 }

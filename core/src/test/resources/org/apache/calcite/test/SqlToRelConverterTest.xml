@@ -6453,6 +6453,21 @@ LogicalProject(EMPNO=[$0], ENAME=[$1], DEPTNO=[$2])
 ]]>
     </Resource>
   </TestCase>
+  <TestCase name="testQualifyNotUpdatedOnMergingProjects">
+    <Resource name="sql">
+      <![CDATA[with t0 as (select ename, sal from emp),
+t1 as (select t0.ename, t0.sal from t0 qualify row_number() over (partition by t0.ename order by t0.sal) = 1)
+select ename, sal from t1]]>
+    </Resource>
+    <Resource name="plan">
+      <![CDATA[
+LogicalProject(ENAME=[$0], SAL=[$1])
+  LogicalFilter(condition=[$2])
+    LogicalProject(ENAME=[$1], SAL=[$5], QualifyExpression=[=(ROW_NUMBER() OVER (PARTITION BY $1 ORDER BY $5), 1)])
+      LogicalTableScan(table=[[CATALOG, SALES, EMP]])
+]]>
+    </Resource>
+  </TestCase>
   <TestCase name="testQualifyWindow">
     <Resource name="sql">
       <![CDATA[SELECT empno, ename, deptno, job, mgr, hiredate
